@@ -91,10 +91,13 @@ class Player(pygame.sprite.Sprite):
                     # botom collision
                     if self.rect.bottom >= sprite.rect.top and self.old_rect.bottom <= sprite.old_rect.top:
                         self.rect.bottom = sprite.rect.top
+                        self.direction.y = 0
                     self.on_floor = True
 
 
+
                     self.pos.y = self.rect.y
+                    
 
                 else: pass
 
