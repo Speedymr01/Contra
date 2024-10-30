@@ -20,7 +20,7 @@ class Player(pygame.sprite.Sprite):
         self.old_rect = self.rect.copy()
         self.collision_sprites = collision_sprites
 
-        self.gravity = 15
+        self.gravity = 7
         self.jump_speed = 1200
         self.on_floor = False
         self.duck = False
@@ -42,8 +42,12 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
 
         # Horizantal
-        if keys[pygame.K_RIGHT]: self.direction.x = 1
-        elif keys[pygame.K_LEFT]: self.direction.x = -1
+        if keys[pygame.K_RIGHT]:
+            self.status = 'right'
+            self.direction.x = 1
+        elif keys[pygame.K_LEFT]:
+            self.status = 'left'
+            self.direction.x = -1
         else: self.direction.x = 0
 
         if keys[pygame.K_UP] and self.on_floor: self.direction.y = -self.jump_speed
@@ -51,6 +55,11 @@ class Player(pygame.sprite.Sprite):
         else: self.duck = False
 
     def move(self, dt):
+        if self.duck and self.on_floor:
+            self.speed = 50
+        else:
+            self.speed = 400
+
         self.pos.x += self.direction.x * self.speed * dt
         self.rect.x = round(self.pos.x)
         self.collision('horizontal')
@@ -63,6 +72,22 @@ class Player(pygame.sprite.Sprite):
         self.rect.y = round(self.pos.y)
         self.collision('vertical')
     
+    def get_status(self):
+        if self.direction.x == 0 and self.on_floor:
+            self.status = self.status.split('_')[0] +'_idle'
+        if self.direction.y != 0 and not self.on_floor:
+            self.status = self.status.split('_')[0] +'_jump'
+        if self.on_floor and self.duck:
+            self.status = self.status.split('_')[0] +'_duck'
+
+    def check_contact(self):
+        bottom_rect = pygame.Rect(0, 0, self.rect.width, 5)
+        bottom_rect.midtop = self.rect.midbottom
+        for sprite in self.collision_sprites.sprites():
+            if sprite.rect.colliderect(bottom_rect):
+                if self.direction.y > 0:
+                    self.on_floor = True
+
     def animate(self, dt):
         self.frame_index += 7 * dt
         if self.frame_index >= len(self.animations[self.status]):
@@ -103,8 +128,11 @@ class Player(pygame.sprite.Sprite):
 
         if self.on_floor and self.direction.y != 0:
             self.on_floor = False
+
     def update(self, dt):
         self.old_rect = self.rect.copy()
         self.input()
+        self.get_status()
         self.move(dt)
+        self.check_contact()
         self.animate(dt)
