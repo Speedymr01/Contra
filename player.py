@@ -8,6 +8,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.Surface((40, 80))
         self.image.fill('yellow')
         self.rect = self.image.get_rect(topleft = pos)
+        self.z = LAYERS['Level']
 
         self.direction = vector()
         self.pos = vector(self.rect.topleft)
