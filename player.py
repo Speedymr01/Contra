@@ -19,6 +19,11 @@ class Player(pygame.sprite.Sprite):
 
         self.old_rect = self.rect.copy()
         self.collision_sprites = collision_sprites
+
+        self.gravity = 15
+        self.jump_speed = 1200
+        self.on_floor = False
+        self.duck = False
     
     def import_assets(self, path):
         self.animations = {}
@@ -41,10 +46,9 @@ class Player(pygame.sprite.Sprite):
         elif keys[pygame.K_LEFT]: self.direction.x = -1
         else: self.direction.x = 0
 
-        # Vertical
-        if keys[pygame.K_UP]: self.direction.y = -1
-        elif keys[pygame.K_DOWN]: self.direction.y = 1
-        else: self.direction.y = 0
+        if keys[pygame.K_UP]: self.direction.y = -self.jump_speed
+        if keys[pygame.K_DOWN]: self.duck = True
+        else: self.duck = False
 
     def move(self, dt):
         self.pos.x += self.direction.x * self.speed * dt
