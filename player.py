@@ -46,7 +46,7 @@ class Player(pygame.sprite.Sprite):
         elif keys[pygame.K_LEFT]: self.direction.x = -1
         else: self.direction.x = 0
 
-        if keys[pygame.K_UP]: self.direction.y = -self.jump_speed
+        if keys[pygame.K_UP] and self.on_floor: self.direction.y = -self.jump_speed
         if keys[pygame.K_DOWN]: self.duck = True
         else: self.duck = False
 
@@ -91,12 +91,15 @@ class Player(pygame.sprite.Sprite):
                     # botom collision
                     if self.rect.bottom >= sprite.rect.top and self.old_rect.bottom <= sprite.old_rect.top:
                         self.rect.bottom = sprite.rect.top
+                    self.on_floor = True
 
 
                     self.pos.y = self.rect.y
 
                 else: pass
 
+        if self.on_floor and self.direction.y != 0:
+            self.on_floor = False
     def update(self, dt):
         self.old_rect = self.rect.copy()
         self.input()
