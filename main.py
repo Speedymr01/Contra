@@ -4,7 +4,7 @@ from pytmx.util_pygame import load_pygame
 from tile import Tile, CollisionTile, MovingPlatform
 from player import Player
 from pygame.math import Vector2 as vector
-from bullet import Bullet
+from bullet import Bullet, FireAnimation
 
 class AllSprites(pygame.sprite.Group):
 	def __init__(self):
@@ -38,7 +38,10 @@ class Main:
 		self.setup()
 
 		self.bullet_surf = pygame.image.load('./graphics/bullet.png').convert_alpha()
-	
+		self.fire_surfs = [pygame.image.load('./graphics/fire/0.png').convert_alpha(),
+					       pygame.image.load('./graphics/fire/1.png').convert_alpha()]
+
+
 	def setup(self):
 		tmx_map = load_pygame('./data/map.tmx')
 		# Collision Tiles
@@ -83,6 +86,12 @@ class Main:
 
 	def shoot(self, pos, direction, entity):
 		Bullet(pos, self.bullet_surf, direction, [self.all_sprites, self.bullet_sprites])
+		FireAnimation(entity, self.fire_surfs, direction, self.all_sprites)
+
+
+	def bullet_collisions(self):
+		for obby in self.collision_sprites.sprites():
+			pygame.sprite.spritecollide(obby, self.bullet_sprites, True)
 
 	def run(self):
 		while True:
@@ -94,6 +103,7 @@ class Main:
 			dt = self.clock.tick() / 1000
 			self.display_surface.fill((249,131,103))
 			self.platform_collisions()
+			self.bullet_collisions()
 			self.all_sprites.update(dt)
 			self.all_sprites.custom_draw(self.player)
 
@@ -102,3 +112,4 @@ class Main:
 if __name__ == '__main__':
 	main = Main()
 	main.run()
+     
