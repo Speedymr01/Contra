@@ -2,53 +2,18 @@ import pygame
 from settings import *
 from pygame.math import Vector2 as vector
 from os import walk
+from entity import Entity
 
-class Player(pygame.sprite.Sprite):
+class Player(Entity):
     def __init__(self, pos, groups, path, collision_sprites, shoot):
-        super().__init__(groups)
-        self.import_assets(path)
-        self.frame_index = 0
-        self.status = 'right'
-        self.image = self.animations[self.status][self.frame_index]
-        self.rect = self.image.get_rect(topleft = pos)
-        self.z = LAYERS['Level']
+        super().__init__(pos, path, groups, shoot)
 
-        self.direction = vector()
-        self.pos = vector(self.rect.topleft)
-        self.speed = 400
-
-        self.old_rect = self.rect.copy()
         self.collision_sprites = collision_sprites
 
         self.gravity = 7
         self.jump_speed = 1200
         self.on_floor = False
-        self.duck = False
         self.moving_floor = None
-
-        self.shoot = shoot
-        self.can_shoot = True
-        self.shoot_time = None
-        self.cooldown = COOLDOWN_TIME
-
-    def shoot_timer(self):
-        if not self.can_shoot:
-            current_time = pygame.time.get_ticks()
-            if current_time - self.shoot_time > self.cooldown:
-                self.can_shoot = True
-
-    def import_assets(self, path):
-        self.animations = {}
-        for index, folder in enumerate(walk(path)):
-            if index == 0:
-                for name in folder[1]:
-                    self.animations[name] = []
-            else:
-                for file_name in sorted(folder[2], key = lambda string: int(string.split('.')[0])):
-                    path = folder[0].replace('\\', '/') + '/' + file_name
-                    surf = pygame.image.load(path).convert_alpha()
-                    key = folder[0].split('\\')[1]
-                    self.animations[key].append(surf)
 
     def input(self):
         keys = pygame.key.get_pressed()
@@ -116,12 +81,6 @@ class Player(pygame.sprite.Sprite):
                     self.on_floor = True
                 if hasattr(sprite, 'direction'):
                     self.moving_floor = sprite
-
-    def animate(self, dt):
-        self.frame_index += 7 * dt
-        if self.frame_index >= len(self.animations[self.status]):
-            self.frame_index = 0
-        self.image = self.animations[self.status][int(self.frame_index)]
 
     def collision(self, direction):
         for sprite in self.collision_sprites.sprites():
